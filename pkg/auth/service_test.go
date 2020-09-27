@@ -10,12 +10,12 @@ import (
 )
 
 func TestSignIn(t *testing.T) {
-	t.Run("InvalidPhone", func(t *testing.T) {
+	t.Run("Invalid", func(t *testing.T) {
 		_, err := auth.SignIn(&memory.AccountStorage{}, "1234567")
 		EqualError(t, err, "phone number is invalid")
 	})
 
-	t.Run("NewUser", func(t *testing.T) {
+	t.Run("New", func(t *testing.T) {
 		acc, err := auth.SignIn(&memory.AccountStorage{}, "09121234567")
 		if NoError(t, err) {
 			NotEmpty(t, acc.ID)
@@ -24,10 +24,12 @@ func TestSignIn(t *testing.T) {
 		}
 	})
 
-	t.Run("ExistingUser", func(t *testing.T) {
+	t.Run("Existing", func(t *testing.T) {
 		storage := &memory.AccountStorage{}
-		_, _ = auth.SignIn(storage, "09121234567")
-		_, err := auth.SignIn(storage, "09121234567")
-		NoError(t, err)
+		acc1, _ := auth.SignIn(storage, "09121234567")
+		acc2, err := auth.SignIn(storage, "09121234567")
+		if NoError(t, err) {
+			Equal(t, acc1.ID, acc2.ID)
+		}
 	})
 }
