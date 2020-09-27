@@ -13,6 +13,10 @@ const (
 	refreshTokenLength = 48
 )
 
+func serviceError(f, msg string, cause error) *errors.ServiceError {
+	return errors.Service("auth", f, msg, cause)
+}
+
 // SignIn logs a user into the system by their phone number. If the user does
 // not exist, it will be created.
 func SignIn(storer AccountStorer, phone string) (*Account, error) {
@@ -23,14 +27,14 @@ func SignIn(storer AccountStorer, phone string) (*Account, error) {
 	var account Account
 	if err := storer.FindByPhone(&account, cellphone); err != nil {
 		if !errors.IsNotFound(err) {
-			return nil, err
+			return nil, serviceError("SignIn", "failed to find account", err)
 		}
 		account.ID = rand.String(accountIDLength)
 		account.Phone = cellphone
 		account.RefreshToken = rand.String(refreshTokenLength)
 		account.RegisteredAt = time.Now()
 		if err := storer.Save(&account); err != nil {
-			return nil, err
+			return nil, serviceError("SignIn", "failed to save account", err)
 		}
 	}
 	return &account, nil

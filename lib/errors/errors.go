@@ -24,6 +24,16 @@ func (e *ServiceError) Unwrap() error {
 	return e.Cause
 }
 
+// Service creates a new ServiceError.
+func Service(name, fun, msg string, cause error) *ServiceError {
+	return &ServiceError{
+		Service: name,
+		Func:    fun,
+		Message: msg,
+		Cause:   cause,
+	}
+}
+
 // NotFoundError defines errors which report a missing entity.
 type NotFoundError interface {
 	error
